@@ -1,0 +1,16 @@
+ul {
+    list-style-type: none;
+    padding: 0 0 20px 0;
+}
+ul li {
+    float: left;
+}
+li a {
+    padding-right: 16px;
+}
+h1 {
+    clear: both;
+}
+.error {
+    color: red;
+}
