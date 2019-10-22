@@ -7,17 +7,44 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, IntegerField
 from wtforms.validators import InputRequired, Regexp, Length, NumberRange, Optional
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 
 def create_app():
+
+   sql.connect("database.db")
+   project_dir = os.path.dirname(os.path.abspath(__file__))
+   database_file = "sqlite:///{}".format(os.path.join(project_dir, "database.db"))
+
    app = Flask(__name__)
+
    app.config.update(
       SESSION_COOKIE_SECURE=False, # should be set to true upon adding SSL
       SESSION_COOKIE_HTTPONLY=True,
       SESSION_COOKIE_SAMESITE='Strict',
       TESTING=True,
-      SECRET_KEY=os.urandom(16)
+      SECRET_KEY=os.urandom(16),
+      SQLALCHEMY_DATABASE_URI = database_file,
+      SQLALCHEMY_TRACK_MODIFICATIONS = False
    )
+   db = SQLAlchemy(app)
 
+   class User(db.Model):
+      id = db.Column('id', db.Integer, primary_key = True)
+      username = db.Column(db.String(50), unique = True)
+      password = db.Column(db.String(100))  
+      pin = db.Column(db.Integer)
+
+      def __init__(self, username, password, pin):
+         self.username = username
+         self.password = generate_password_hash(password)
+         self.pin = pin 
+
+   db.create_all()
+   admin = User.query.filter_by(username='admin').first()
+   if admin is None:
+      db.engine.execute("INSERT INTO user (username,password,pin) VALUES ('admin','pbkdf2:sha256:150000$FvnZM8fM$f37c7ec344b2aaef2d23ffd50507222e3215518c45ed7a326f986b4912c4c12b','19008675309')")
+   
    @app.after_request
    def set_headers(response):
       response.headers['Content-Security-Policy'] = "default-src 'self'"
@@ -76,24 +103,20 @@ def create_app():
             username = form.uname.data
             password = form.pword.data
             pin = form.pin.data
-            with sql.connect("database.db") as con:
-               cur = con.cursor()
-               if username != '' and password != '' and pin != '':
-                  con.row_factory = sql.Row
-                  cur.execute("SELECT * FROM user WHERE username = ? ",[username])
-                  rows = cur.fetchall()
-                  if len(rows) >= 1:
-                     flash("Failure: Account already exists. Please login or select a different username.","success")
-                     return redirect(url_for('login'))  
-                  else:
-                     password = generate_password_hash(password)
-                     cur.execute("INSERT INTO user (username,password,pin) VALUES (?,?,?)",(username,password,pin))
-                     con.commit()
-                     flash("Success: Account registered!","success")
-                     return redirect(url_for('login'))  
+
+            if username != '' and password != '' and pin != '':
+               user = User.query.filter_by(username=username).first()
+               if user != None:
+                  flash("Failure: Account already exists. Please login or select a different username.","success")
+                  return redirect(url_for('login'))  
                else:
-                  flash("Failure: Invalid account details. Please try again.","success")
-               con.close()
+                  user = User(username, password, pin)
+                  db.session.add(user)
+                  db.session.commit()                     
+                  flash("Success: Account registered!","success")
+                  return redirect(url_for('login'))  
+            else:
+               flash("Failure: Invalid account details. Please try again.","success")
          else:   
             flash("Failure: Please try again.","success")
 
@@ -114,17 +137,10 @@ def create_app():
             password = form.pword.data
             pin = form.pin.data
             
-            con = sql.connect("database.db")
-            con.row_factory = sql.Row
-            
-            cur = con.cursor()
-            cur.execute("SELECT * FROM user WHERE username = ?",[username] )
-            
-            rows = cur.fetchall()
-            con.close()
+            user = User.query.filter_by(username=username).first()
 
-            if len(rows) >= 1 and check_password_hash(rows[0]['password'],password):
-               if (pin == rows[0]['pin']) or (pin == "" and rows[0]['pin'] is None):
+            if user != None and check_password_hash(user.password,password):
+               if (pin == user.pin) or (pin == "" and user.pin is None):
                   session['username'] = username
                   flash("Success: You are logged in!","result")
                   return redirect(url_for('spell_check'))                              
