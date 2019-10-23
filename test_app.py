@@ -250,7 +250,7 @@ class FlaskTestCase(unittest.TestCase):
         log_username = html.find("span", {"id":"log_username"}).get_text()
         log_entry = html.find("li", {"class":"log_entry"}).get_text()
         assert(log_username == UNAME)
-        assert b"login:" in log_entry
+        assert "login:" in log_entry
         self.app.get('/logout')        
 
 
