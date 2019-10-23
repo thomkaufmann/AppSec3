@@ -177,6 +177,82 @@ class FlaskTestCase(unittest.TestCase):
         assert(textout == inputtext)        
         assert(misspelled == "byootiful, else's, myne")   
         self.app.get('/logout')
+    
+    def test_history(self):
+        response = self.app.get('/register')
+        html = bs4.BeautifulSoup(response.data,"html.parser")
+        csrf_token = html.find('input', {'id': 'csrf_token'}).get('value')      
+        uname = "username"+str(random.randint(1, 1000000))
+        pword = "password"+str(random.randint(1, 1000000))
+        pin = random.randint(10000000000, 99999999999)
+        data = dict(
+            csrf_token=csrf_token,
+            uname=uname,
+            pword=pword,
+            pin=pin
+        )
+        response = self.app.post('/register', data=data, follow_redirects=True)
+        assert b"Success" in response.data   
+
+        data = dict(
+            csrf_token=csrf_token,
+            uname=uname,
+            pword=pword,
+            pin=pin
+        )
+        response = self.app.post('/login', data=data, follow_redirects=True) 
+
+        inputtext = """ It's not enough
+                        I need moar
+                        Nuthin seems to satisfy
+                        I said I don't want it
+                        I just need it
+                        To breathe, to feel, to know Im alive """
+        data = dict(
+            csrf_token=csrf_token,
+            inputtext=inputtext
+        )
+        response = self.app.post('/spell_check', data=data, follow_redirects=True) 
+        response = self.app.get('/history') 
+        html = bs4.BeautifulSoup(response.data,"html.parser")
+
+        numqueries = html.find(id="numqueries").get_text() 
+        assert(numqueries == "1")
+        link = html.find("a", {"class":"query_link"}).get("href")
+        response = self.app.get(link, follow_redirects=True) 
+        html = bs4.BeautifulSoup(response.data,"html.parser")
+        querytext = html.find(id="querytext").get_text()
+        username = html.find(id="username").get_text()
+        queryresults = html.find(id="queryresults").get_text()
+        assert(querytext == inputtext)        
+        assert(username == uname)        
+        assert(queryresults == "moar, Nuthin, Im")  
+        self.app.get('/logout')
+
+    def test_logs(self):
+        response = self.app.get('/login')
+        csrf_token = bs4.BeautifulSoup(response.data,"html.parser").find('input', {'id': 'csrf_token'}).get('value')      
+        data = dict(
+            csrf_token=csrf_token,
+            uname=UNAME,
+            pword=PWORD,
+            pin=PIN
+        )
+        self.app.post('/login', data=data, follow_redirects=True)
+        response = self.app.get('/login_history')
+        csrf_token = bs4.BeautifulSoup(response.data,"html.parser").find('input', {'id': 'csrf_token'}).get('value')      
+        data = dict(
+            csrf_token=csrf_token,
+            user_id=1
+        )        
+        response = self.app.post('/login_history', data=data, follow_redirects=True)
+        html = bs4.BeautifulSoup(response.data,"html.parser")
+        log_username = html.find("span", {"id":"log_username"}).get_text()
+        log_entry = html.find("li", {"class":"log_entry"}).get_text()
+        assert(log_username == UNAME)
+        assert b"login:" in log_entry
+        self.app.get('/logout')        
+
 
 if __name__ == '__main__':
     unittest.main()

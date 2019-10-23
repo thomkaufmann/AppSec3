@@ -28,7 +28,7 @@
         <h3>Submissions made by {{ user.username }}: <span id="numqueries">{{ count }}</span></h3>
         
         {% for submission in submissions %}
-            <p><a id="query{{ submission.id}}" href="/history/query{{ submission.id}}">Query {{ submission.id }}</a></p>
+            <p><a class="query_link" id="query{{ submission.id}}" href="/history/query{{ submission.id}}">Query {{ submission.id }}</a></p>
         {% endfor %}
     </body>
 </html>

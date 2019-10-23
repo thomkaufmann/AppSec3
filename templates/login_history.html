@@ -1,11 +1,11 @@
 <html>
     <head>
-        <title>History</title>
+        <title>Login History</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
     <body>
         {% include "navigation.html" %}
-        <h1>History</h1>   
+        <h1>Login History</h1>   
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -25,10 +25,10 @@
         
         
         {% if logs != None %}
-            <h3>Log activity for {{ user.username }}:</h3>
+            <h3>Log activity for <span id="log_username">{{ user.username }}</span>:</h3>
             <ul>
                 {% for log in logs %}
-                    <li id="login{{ log.id }}">login: <span id="login{{ log.id }}_time">{{ log.login.time() }}</span> logout:<span id="logout{{ log.id }}_time">{{ log.logout.time() if log.logout else 'N/A'}}</span></li>
+                    <li class="log_entry" id="login{{ log.id }}">login: <span id="login{{ log.id }}_time">{{ log.login.time() }}</span> logout:<span id="logout{{ log.id }}_time">{{ log.logout.time() if log.logout else 'N/A'}}</span></li>
                 {% endfor %}
             </ul>
         {% endif %}
