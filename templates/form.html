@@ -4,12 +4,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
     <body>
-        <ul>
-            <li><a href="{{ url_for('register') }}">Register</a></li>
-            <li><a href="{{ url_for('login') }}">Login</a></li>
-            <li><a href="{{ url_for('spell_check') }}">Spell Check</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-        </ul>
+        {% include "navigation.html" %}
         <h1>{{ type }}</h1>   
         
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -25,17 +20,17 @@
             <p>{{ form.uname.label }}</p>
             <p>{{ form.uname(size=20) }}</p>
             {% for error in form.uname.errors %}
-            <p class="error">[{{ error }}]</p>
+                <p class="error">[{{ error }}]</p>
             {% endfor %}                     
             <p>{{ form.pword.label }}</p> 
             <p>{{ form.pword(size=20) }}</p>     
             {% for error in form.pword.errors %}
-            <p class="error">[{{ error }}]</p>
+                <p class="error">[{{ error }}]</p>
             {% endfor %}   
             <p>{{ form.pin.label }}</p> 
             <p>{{ form.pin(size=20) }}</p>   
             {% for error in form.pin.errors %}
-            <p class="error">[{{ error }}]</p>
+                <p class="error">[{{ error }}]</p>
             {% endfor %} 
             <p>{{ form.submit() }}</p>
         </form>

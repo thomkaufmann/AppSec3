@@ -1,11 +1,11 @@
-ul {
+ul#navigation {
     list-style-type: none;
     padding: 0 0 20px 0;
 }
-ul li {
+ul#navigation li {
     float: left;
 }
-li a {
+ul#navigation li a {
     padding-right: 16px;
 }
 h1 {

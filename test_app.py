@@ -51,6 +51,7 @@ class FlaskTestCase(unittest.TestCase):
         )
         response = self.app.post('/login', data=data, follow_redirects=True)
         assert b"Success" in response.data  
+        self.app.get('/logout')
 
     def test_login_2fa_failure(self):
         response = self.app.get('/login')
@@ -147,7 +148,8 @@ class FlaskTestCase(unittest.TestCase):
             inputtext=inputtext
         )
         response = self.app.post('/spell_check', data=data, follow_redirects=True) 
-        assert b"This is remote text" not in response.data          
+        assert b"This is remote text" not in response.data      
+        self.app.get('/logout')    
 
     def test_spell_check(self):
         response = self.app.get('/login')
@@ -173,7 +175,8 @@ class FlaskTestCase(unittest.TestCase):
         textout = html.find("textarea", {'id': 'textout'}).get_text() 
         misspelled = html.find("textarea", {'id': 'misspelled'}).get_text() 
         assert(textout == inputtext)        
-        assert(misspelled == "byootiful, else's, myne")  
+        assert(misspelled == "byootiful, else's, myne")   
+        self.app.get('/logout')
 
 if __name__ == '__main__':
     unittest.main()
