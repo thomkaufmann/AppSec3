@@ -67,8 +67,9 @@ def create_app():
    db.create_all()
    admin = User.query.filter_by(username='admin').first()
    if admin is None:
-      db.engine.execute("INSERT INTO user (username,password,pin,admin) VALUES ('admin','pbkdf2:sha256:150000$FvnZM8fM$f37c7ec344b2aaef2d23ffd50507222e3215518c45ed7a326f986b4912c4c12b','19008675309',1)")
-   
+      db.session.add(User('admin','Administrator@1',12345678901,True))
+      db.session.commit()
+      
    @app.after_request
    def set_headers(response):
       response.headers['Content-Security-Policy'] = "default-src 'self'"

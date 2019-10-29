@@ -4,8 +4,8 @@ import random
 import bs4
 
 UNAME="admin"
-PWORD="badpassword"
-PIN="19008675309"
+PWORD="Administrator@1"
+PIN="12345678901"
 
 class FlaskTestCase(unittest.TestCase):
 
