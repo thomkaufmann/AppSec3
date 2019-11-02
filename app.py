@@ -254,7 +254,7 @@ def create_app():
    class UserForm(FlaskForm):
       uname = StringField('Username', validators=[InputRequired(), Regexp(r'^[\w.@+-]+$'), Length(min=4, max=25)])
       pword = PasswordField('Password', validators=[InputRequired()])
-      pin = IntegerField('Two-Factor Authentication', validators=[Optional()], id='2fa')
+      pin = IntegerField('Two-Factor Authentication', validators=[Optional(), NumberRange(min=1000000000,max=99999999999)], id='2fa')
       submit = SubmitField('Submit')
 
    class SpellForm(FlaskForm):
